@@ -138,9 +138,15 @@ function buildWhereClause(params?: PackageFilterParams): Record<string, unknown>
   if (effectiveCategory && effectiveCategory !== "all") {
     const catLower = effectiveCategory.toLowerCase();
     if (catLower.includes("international")) {
-      whereClause.category = { contains: "International" };
+      whereClause.OR = [
+        { category: { contains: "International" } },
+        { destination: { countryName: { not: "India" } } },
+      ];
     } else if (catLower.includes("domestic")) {
-      whereClause.category = { contains: "Domestic" };
+      whereClause.OR = [
+        { category: { contains: "Domestic" } },
+        { destination: { countryName: "India" } },
+      ];
     } else if (catLower.includes("luxury")) {
       whereClause.OR = [
         { category: { contains: "Luxury" } },

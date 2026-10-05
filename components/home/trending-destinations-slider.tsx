@@ -56,7 +56,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Japan",
     country: "Japan",
     region: "international",
-    href: "/destinations",
+    href: "/destinations/japan/japan",
     image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=700&q=80", // Pagoda & Cherry Blossoms
     hasDarkTopOverlay: false,
     renderTitle: () => (
@@ -73,7 +73,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Vietnam",
     country: "Vietnam",
     region: "international",
-    href: "/destinations",
+    href: "/destinations/vietnam/vietnam",
     image: "https://images.unsplash.com/photo-1574950578143-858c6fc58922?auto=format&fit=crop&w=700&q=80", // Saigon Bitexco tower skyline at dusk
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -176,7 +176,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Maldives",
     country: "Maldives",
     region: "international",
-    href: "/destinations",
+    href: "/destinations/maldives/maldives",
     image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=700&q=80", // Maldives overwater bungalow
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -195,7 +195,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Kashmir",
     country: "India",
     region: "india",
-    href: "/holidays/domestic",
+    href: "/destinations/india/kashmir",
     image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=700&q=80", // Dal lake shikara
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -229,7 +229,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Rajasthan",
     country: "India",
     region: "india",
-    href: "/holidays/domestic",
+    href: "/destinations/india/rajasthan",
     image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=700&q=80", // Hawa Mahal Jaipur
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -246,7 +246,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Goa",
     country: "India",
     region: "india",
-    href: "/holidays/domestic",
+    href: "/destinations/india/goa",
     image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80", // Goa beach & palms
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -263,7 +263,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Himachal",
     country: "India",
     region: "india",
-    href: "/holidays/domestic",
+    href: "/destinations/india/himachal",
     image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=700&q=80", // Manali Snow Himalayas
     hasDarkTopOverlay: true,
     renderTitle: () => (
@@ -297,7 +297,7 @@ const DESTINATIONS: DestinationCard[] = [
     name: "Andaman",
     country: "India",
     region: "india",
-    href: "/holidays/domestic",
+    href: "/destinations/india/andaman",
     image: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=700&q=80", // Andaman Havelock beach
     hasDarkTopOverlay: true,
     renderTitle: () => (
