@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Dancing+Script:wght@600;700&family=Oswald:wght@500;600;700&display=swap');
+@import "tailwindcss";
+
+
+@theme {
+  --color-brand-navy-950: #0a111a;
+  --color-brand-navy-900: #111a28;
+  --color-brand-navy-800: #18253d;
+  --color-brand-navy-700: #213353;
+  --color-brand-navy-600: #2d446f;
+  --color-brand-navy-500: #3c5a92;
+  --color-brand-navy-100: #e3e8f2;
+  --color-brand-navy-50: #f2f5f9;
+
+  --color-brand-gold-700: #9e670c;
+  --color-brand-gold-600: #c28216;
+  --color-brand-gold-500: #e09f2b;
+  --color-brand-gold-400: #f0b54d;
+  --color-brand-gold-300: #f6cb7d;
+  --color-brand-gold-100: #fef5e0;
+  --color-brand-gold-50: #fffaf0;
+
+  --color-brand-teal-700: #095f6c;
+  --color-brand-teal-600: #0d8294;
+  --color-brand-teal-500: #14a3b9;
+  --color-brand-teal-100: #d6f2f7;
+  --color-brand-teal-50: #effbfd;
+
+  --color-brand-emerald-700: #197850;
+  --color-brand-emerald-600: #24a873;
+  --color-brand-emerald-500: #2ec287;
+  --color-brand-emerald-100: #daf6ea;
+  --color-brand-emerald-50: #edfbf4;
+
+  --font-sans: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-heading), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-display), Georgia, serif;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --base-font-size: 17px;
+}
+
+/* Global Root Font Sizing for Superior Readability Across All Devices */
+html {
+  font-size: var(--base-font-size);
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --base-font-size: 17.5px;
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --base-font-size: 18px;
+  }
+}
+
+/* User-Configurable Accessible Font Scaling Modes */
+html[data-font-size="normal"],
+html:not([data-font-size]) {
+  --base-font-size: 17px;
+}
+@media (min-width: 768px) {
+  html[data-font-size="normal"],
+  html:not([data-font-size]) {
+    --base-font-size: 17.5px;
+  }
+}
+@media (min-width: 1440px) {
+  html[data-font-size="normal"],
+  html:not([data-font-size]) {
+    --base-font-size: 18px;
+  }
+}
+
+html[data-font-size="large"] {
+  --base-font-size: 19.5px;
+}
+@media (min-width: 768px) {
+  html[data-font-size="large"] {
+    --base-font-size: 20px;
+  }
+}
+@media (min-width: 1440px) {
+  html[data-font-size="large"] {
+    --base-font-size: 21px;
+  }
+}
+
+html[data-font-size="extra-large"] {
+  --base-font-size: 22px;
+}
+@media (min-width: 768px) {
+  html[data-font-size="extra-large"] {
+    --base-font-size: 23px;
+  }
+}
+@media (min-width: 1440px) {
+  html[data-font-size="extra-large"] {
+    --base-font-size: 24px;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.625;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Guarantee minimum readable font size for all badges, captions, and micro-text */
+.text-\[10px\],
+.text-\[11px\] {
+  font-size: 0.8125rem !important; /* Scalable ~14px minimum */
+  line-height: 1.35 !important;
+  font-weight: 600;
+}
+
+.text-xs {
+  font-size: 0.84rem !important; /* Scalable ~14.5px */
+  line-height: 1.4 !important;
+}
+
+/* Improve contrast ratio of subtle and muted text */
+.text-slate-400 {
+  color: #64748b !important; /* Slate 500 equivalent for strong readable contrast */
+}
+
+.text-slate-500 {
+  color: #475569 !important; /* Slate 600 equivalent for clear text visibility */
+}
+
+/* Custom luxury scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Focus Rings for WCAG 2.1 AA Compliance */
+:focus-visible {
+  outline: 2px solid #e09f2b;
+  outline-offset: 2px;
+}
+
+/* Luxury Elevation Classes */
+.shadow-luxury-sm {
+  box-shadow: 0 2px 8px -2px rgba(24, 37, 61, 0.06), 0 1px 4px -1px rgba(24, 37, 61, 0.04);
+}
+
+.shadow-luxury-md {
+  box-shadow: 0 8px 24px -4px rgba(24, 37, 61, 0.08), 0 4px 12px -2px rgba(24, 37, 61, 0.04);
+}
+
+.shadow-luxury-lg {
+  box-shadow: 0 16px 36px -6px rgba(24, 37, 61, 0.12), 0 6px 16px -3px rgba(24, 37, 61, 0.06);
+}
+
+.shadow-luxury-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shadow-luxury-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -8px rgba(24, 37, 61, 0.14), 0 8px 20px -4px rgba(24, 37, 61, 0.08);
+}
+
+/* Shimmer effect for luxury skeletons */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.4) 20%,
+      rgba(255, 255, 255, 0.6) 60%,
+      rgba(255, 255, 255, 0));
+  animation: shimmer 1.8s infinite;
+  content: "";
+}
+
+/* True Full-Screen Fluid Layout across all monitors (100% width, no boxed boundaries) */
+html,
+body {
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+}
+
+/* True 100% Full-Screen Layout Across Entire Application */
+.site-container,
+.section-container,
+.container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 640px) {
+
+  .site-container,
+  .section-container,
+  .container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+
+  .site-container,
+  .section-container,
+  .container {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+}
+
+@media (min-width: 1440px) {
+
+  .site-container,
+  .section-container,
+  .container {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+  }
+}
+
+@media (min-width: 1920px) {
+
+  .site-container,
+  .section-container,
+  .container {
+    padding-left: 4.5rem !important;
+    padding-right: 4.5rem !important;
+  }
+}
+
+@media (min-width: 2560px) {
+
+  .site-container,
+  .section-container,
+  .container {
+    padding-left: 5rem !important;
+    padding-right: 5rem !important;
+  }
+}
+
+@utility container {
+  width: 100% !important;
+  max-width: 100% !important;
+}

@@ -1,0 +1,706 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Region {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String
+  countries   Country[]
+  destinations Destination[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Country {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  slug         String        @unique
+  isoCode      String        @unique
+  regionId     String
+  region       Region        @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  destinations Destination[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model TourismSource {
+  id            String               @id @default(cuid())
+  sourceName    String
+  sourceUrl     String
+  authorityType String               // "Official Tourism Board", "Government Consular Authority", "Official Attraction Website"
+  verifiedAt    DateTime             @default(now())
+  lastCheckedAt DateTime             @default(now())
+  destinations  Destination[]
+  attractions   Attraction[]
+  travelInfos   TravelInformation[]
+  faqs          DestinationFAQ[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model Destination {
+  id                  String             @id @default(cuid())
+  name                String
+  slug                String             @unique
+  countryId           String
+  regionId            String
+  primarySourceId     String?
+  
+  shortDescription    String
+  longDescription     String
+  
+  // Media with Verified Licensing / Attribution
+  heroImage           String
+  heroImageSource     String
+  heroImageLicense    String
+  galleryJson         String             // JSON string: array of { url, caption, source, license }
+  
+  // Factual Logistics
+  bestTimeToVisit     String
+  recommendedDuration String
+  travelStyle         String
+  languages           String
+  currency            String
+  timeZone            String
+  
+  // Curated Sections (JSON Arrays)
+  whyVisitJson        String             // JSON string: array of string reasons
+  thingsToDoJson      String             // JSON string: array of { title, description, officialTip }
+  travelTipsJson      String             // JSON string: array of string tips
+  
+  isFeatured          Boolean            @default(false)
+  isArchived          Boolean            @default(false)
+  
+  country             Country            @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  region              Region             @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  primarySource       TourismSource?     @relation(fields: [primarySourceId], references: [id], onDelete: SetNull)
+  
+  attractions         Attraction[]
+  faqs                DestinationFAQ[]
+  travelInfo          TravelInformation?
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([slug])
+  @@index([countryId])
+  @@index([regionId])
+  @@index([name])
+}
+
+model Attraction {
+  id              String         @id @default(cuid())
+  destinationId   String
+  name            String
+  slug            String
+  description     String
+  locationName    String
+  timings         String
+  entryFeePolicy  String
+  officialWebsite String
+  imageUrl        String
+  imageSource     String
+  imageLicense    String
+  sourceId        String?
+
+  destination     Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  source          TourismSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([destinationId, slug])
+  @@index([name])
+  @@index([destinationId])
+}
+
+model DestinationFAQ {
+  id            String         @id @default(cuid())
+  destinationId String
+  question      String
+  answer        String
+  sourceId      String?
+  sourceName    String
+  sourceUrl     String
+
+  destination   Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  source        TourismSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TravelInformation {
+  id                     String         @id @default(cuid())
+  destinationId          String         @unique
+  visaPolicy             String
+  customsGuidelines      String
+  currencyExchangeTips   String
+  emergencyNumbers       String
+  healthSafetyAdvisory   String
+  sourceId               String?
+
+  destination            Destination    @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  source                 TourismSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+}
+
+// ====================================================
+// PHASE 3: HOLIDAY CATALOGUE & PACKAGE DATABASE
+// ====================================================
+
+model PackageSource {
+  id            String    @id @default(cuid())
+  name          String    // e.g. "Sah Tour And Travel Verified Inventory", "Authorized Swiss Travel System Partner"
+  licenseRef    String    // e.g. "STT-DXB-2026-V1", "STT-STS-CHE-2026"
+  sourceType    String    // "VERIFIED_OPERATOR_INVENTORY", "ACCREDITED_SUPPLIER_ALLOTMENT"
+  contactInfo   String
+  verifiedAt    DateTime  @default(now())
+  packages      Package[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model PackageDestination {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  countryName String
+  regionName  String
+  packages    Package[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+  @@index([countryName])
+}
+
+model Package {
+  id                   String              @id @default(cuid())
+  name                 String
+  slug                 String              @unique
+  packageDestinationId String
+  
+  category             String              // "International Holidays", "Domestic Holidays", "Honeymoon Holidays", etc.
+  durationDays         Int
+  durationNights       Int
+  durationText         String              // e.g. "5 Days / 4 Nights"
+  travelStyle          String              // e.g. "Luxury Escorted Tour", "Alpine Scenic Rail", "Tropical Family Retreat"
+  
+  // Transparent Pricing Distinction
+  startingPrice        Float               // Starting from price per person
+  currency             String              @default("INR")
+  priceType            String              @default("STARTING_FROM") // "STARTING_FROM" vs "FINAL_PRICE"
+  departureCity        String              // e.g. "Mumbai", "Delhi", "Ex-Cochin", "Ex-Destination"
+  mealPlan             String              // e.g. "Breakfast (CP)", "All Meals (AP)", "Breakfast & Dinner (MAP)"
+  
+  shortDescription     String
+  longDescription      String
+  highlightsJson       String              // JSON array of strings
+  
+  cancellationPolicy   String
+  terms                String
+  
+  sourceId             String
+  lastVerifiedDate     DateTime            @default(now())
+  
+  hasLiveAvailability Boolean             @default(true)
+  availableSlots      Int                 @default(12)
+  inventoryNotice     String?
+  livePricingSource   String?
+  
+  isFeatured           Boolean             @default(false)
+  isArchived           Boolean             @default(false)
+  popularityScore      Int                 @default(100)
+  
+  destination          PackageDestination  @relation(fields: [packageDestinationId], references: [id], onDelete: Restrict)
+  source               PackageSource       @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  
+  images               PackageImage[]
+  itinerary            PackageItinerary[]
+  hotels               PackageHotel[]
+  activities           PackageActivity[]
+  inclusions           PackageInclusion[]
+  exclusions           PackageExclusion[]
+  faqs                 PackageFAQ[]
+  wishlists            WishlistItem[]
+  bookings             Booking[]
+  enquiries            Enquiry[]
+  reviews              Review[]
+
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([packageDestinationId])
+  @@index([startingPrice])
+  @@index([durationDays])
+  @@index([departureCity])
+  @@index([travelStyle])
+  @@index([mealPlan])
+}
+
+model PackageImage {
+  id        String   @id @default(cuid())
+  packageId String
+  url       String
+  caption   String
+  isHero    Boolean  @default(false)
+  source    String   // Licensed source attribution
+  license   String   // Commercial license tag
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+model PackageItinerary {
+  id              String   @id @default(cuid())
+  packageId       String
+  dayNumber       Int
+  title           String
+  description     String
+  mealsIncluded   String   // e.g. "Breakfast, Dinner"
+  stayDetails     String?  // e.g. "Overnight at Aloft City Centre Deira"
+  transferDetails String?  // e.g. "Private air-conditioned transfer"
+  package         Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, dayNumber])
+}
+
+model PackageHotel {
+  id                 String   @id @default(cuid())
+  packageId          String
+  hotelName          String
+  starRating         Int
+  cityName           String
+  roomType           String
+  officialLicenseRef String   // Licensed hotel registration ID
+  nightsCount        Int
+  package            Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId])
+  @@index([starRating])
+}
+
+model PackageActivity {
+  id           String   @id @default(cuid())
+  packageId    String
+  title        String
+  description  String
+  locationName String
+  duration     String
+  isIncluded   Boolean  @default(true)
+  package      Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId])
+  @@index([title])
+}
+
+model PackageInclusion {
+  id          String   @id @default(cuid())
+  packageId   String
+  title       String
+  description String?
+  category    String   // "Accommodation", "Transfers", "Sightseeing", "Meals", "Visa & Taxes"
+  package     Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+model PackageExclusion {
+  id          String   @id @default(cuid())
+  packageId   String
+  title       String
+  description String?
+  package     Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+model PackageFAQ {
+  id        String   @id @default(cuid())
+  packageId String
+  question  String
+  answer    String
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+// ====================================================
+// PHASE 6: CUSTOMER AUTHENTICATION, PROFILE & DASHBOARD
+// ====================================================
+
+model User {
+  id                  String               @id @default(cuid())
+  name                String
+  email               String               @unique
+  passwordHash        String?
+  phone               String?
+  country             String?
+  image               String?
+  preferredLanguage   String               @default("English")
+  travelPreferences   String?              // Comma-separated or JSON list of preferred travel styles
+  role                String               @default("CUSTOMER") // "CUSTOMER", "AGENT", "ADMIN"
+  emailVerified       DateTime?
+  googleId            String?              @unique
+  
+  sessions            Session[]
+  verificationTokens  VerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  wishlists           WishlistItem[]
+  bookings            Booking[]
+  enquiries           Enquiry[]
+  payments            Payment[]
+  reviews             Review[]
+  notifications       Notification[]
+  isArchived          Boolean              @default(false)
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expiresAt    DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  packageId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packageId])
+  @@index([userId])
+  @@index([packageId])
+}
+
+model Booking {
+  id               String    @id @default(cuid())
+  bookingReference String    @unique // e.g. "STT-BK-2026-9812"
+  userId           String?
+  packageId        String
+  
+  customerName     String    @default("Traveler")
+  customerEmail    String    @default("guest@sahtour.com")
+  customerPhone    String    @default("+91 98765 43210")
+  
+  travelDate       DateTime
+  adultsCount      Int       @default(2)
+  childrenCount    Int       @default(0)
+  infantsCount     Int       @default(0)
+  travelersCount   Int       @default(2)
+  travelersJson    String    @default("[]") // JSON array of detailed traveler info: [{ type, title, firstName, lastName, gender, age, passportNumber, passportExpiry }]
+  
+  addonsJson       String?   // JSON array of selected add-ons: [{ id, name, price, quantity, total }]
+  addonsAmount     Float     @default(0)
+  
+  basePrice        Float     @default(0) // Base package pricing * travellers
+  taxesAmount      Float     @default(0) // 5% GST
+  feesAmount       Float     @default(0) // Regulatory & supplier booking fees
+  totalAmount      Float     // Total = basePrice + taxesAmount + feesAmount + addonsAmount
+  currency         String    @default("INR")
+  
+  // Phase 8 exact 5 statuses: "Pending", "Payment Pending", "Confirmed", "Cancelled", "Completed"
+  status           String    @default("Pending")
+  
+  paymentStatus    String    @default("PENDING") // "UNPAID", "PENDING", "PAID", "REFUNDED", "FAILED"
+  paymentMethod    String?   // "UPI", "CREDIT_CARD", "NET_BANKING", "RAZORPAY", "PAY_AT_DESK"
+  transactionId    String?   // e.g. "TXN-2026-91823"
+  razorpayOrderId  String?
+  
+  specialRequests  String?
+  agentNotes       String?
+  payments         Payment[]
+  reviews          Review[]
+  
+  user             User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  package          Package   @relation(fields: [packageId], references: [id], onDelete: Restrict)
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([packageId])
+  @@index([status])
+  @@index([bookingReference])
+  @@index([razorpayOrderId])
+  @@index([customerEmail])
+  @@index([createdAt])
+}
+
+model Enquiry {
+  id                    String    @id @default(cuid())
+  referenceNo           String    @unique // e.g. "STT-ENQ-2026-8021"
+  userId                String?
+  packageId             String?
+  name                  String    @default("Traveler")
+  email                 String    @default("inquiry@sahtourandtravel.com")
+  phone                 String    @default("+91 98765 43210")
+  destination           String    @default("Switzerland & The Alps")
+  travelDate            DateTime?
+  travelersCount        Int       @default(2)
+  budgetRange           String?   // e.g. "₹40,000 - ₹75,000"
+  travelType            String?   // "Family", "Honeymoon", "Solo", "Group", "Luxury", "Adventure", "Corporate"
+  subject               String?
+  message               String
+  isCallback            Boolean   @default(false)
+  preferredCallbackTime String?   // "Morning (9 AM - 12 PM)", "Afternoon (12 PM - 4 PM)", "Evening (4 PM - 8 PM)"
+  status                String    @default("New") // "New", "Contacted", "In Progress", "Quoted", "Converted", "Closed"
+  agentNotes            String?
+  quotedAmount          Float?
+  isArchived            Boolean   @default(false)
+  
+  user                  User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package               Package?  @relation(fields: [packageId], references: [id], onDelete: SetNull)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([email])
+  @@index([referenceNo])
+  @@index([createdAt])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  transactionId     String   @unique // e.g. "TXN-2026-91823" or Razorpay payment ID
+  razorpayPaymentId String?  @unique
+  razorpayOrderId   String?
+  razorpaySignature String?
+  userId            String?
+  bookingId         String?
+  amount            Float
+  currency          String   @default("INR")
+  paymentMethod     String   // "Razorpay", "UPI", "Bank Card", "Net Banking", "Pay at Desk"
+  status            String   @default("SUCCESS") // "SUCCESS", "PENDING", "FAILED", "REFUNDED"
+  receiptUrl        String?
+  refundId          String?
+  refundAmount      Float?
+  refundStatus      String?  // "PENDING", "PROCESSED", "FAILED"
+  refundReason      String?
+  refundedAt        DateTime?
+  failureReason     String?
+  
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  booking           Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt @default(now())
+
+  @@index([userId])
+  @@index([bookingId])
+  @@index([razorpayOrderId])
+  @@index([status])
+}
+
+model Review {
+  id              String    @id @default(cuid())
+  userId          String
+  packageId       String
+  bookingId       String?
+  rating          Int       // 1 to 5
+  title           String    @default("Verified Travel Review")
+  comment         String
+  travelDate      DateTime?
+  photoUrl        String?
+  
+  // Phase 12 Exact Admin Moderation Statuses: "Pending", "Approved", "Rejected"
+  status          String    @default("Pending")
+  moderationNotes String?
+  moderatedAt     DateTime?
+  moderatedBy     String?
+  
+  isVerified      Boolean   @default(true)
+  isArchived      Boolean   @default(false)
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package         Package   @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  booking         Booking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([packageId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // "INFO", "BOOKING", "SECURITY", "OFFER"
+  isRead    Boolean  @default(false)
+  link      String?
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ====================================================
+// PHASE 10: ADMIN CONSOLE, RBAC & AUDIT LOGGING
+// ====================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String   @default("System Admin")
+  userRole  String   @default("Admin") // "Admin", "Travel Manager", "Content Manager", "Support Agent"
+  action    String   // "CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE"
+  module    String   // "Destinations", "Packages", "Itineraries", "Hotels", "Activities", "Bookings", "Customers", "Enquiries", "Reviews", "Offers", "Coupons", "Content", "Users", "Settings"
+  entityId  String?
+  details   String   // JSON text or structured summary
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([module])
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model Offer {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  badge        String    @default("Limited Time") // "Early Bird", "Festive Saver", "Exclusive"
+  description  String
+  discountType String    @default("PERCENTAGE") // "PERCENTAGE", "FLAT"
+  discountVal  Float     // 10 (% or INR flat)
+  packageId    String?
+  packageName  String?
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  bannerImage  String?
+  isFeatured   Boolean   @default(false)
+  isArchived   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([isArchived])
+}
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique // e.g. "SAHTRAVEL2026", "SUMMER5000"
+  description   String
+  discountType  String    @default("FLAT") // "PERCENTAGE", "FLAT"
+  discountVal   Float     // Amount or %
+  minBookingVal Float     @default(0)
+  maxDiscount   Float?
+  usageLimit    Int       @default(100)
+  usedCount     Int       @default(0)
+  validFrom     DateTime  @default(now())
+  validUntil    DateTime?
+  isArchived    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([code])
+  @@index([isArchived])
+}
+
+model ContentItem {
+  id                      String   @id @default(cuid())
+  title                   String
+  slug                    String   @unique
+  category                String   // "Destination Guides", "Travel Tips", "Visa Guides", "Packing Guides", "Honeymoon Guides", "Family Travel", "Budget Travel", "Luxury Travel", "Adventure Travel"
+  summary                 String
+  body                    String   // Markdown / rich content with verified travel facts
+  author                  String   @default("Sah Tour Editorial Desk")
+  authorRole              String?  @default("Senior Travel Curator")
+  authorAvatar            String?
+  coverImage              String?
+  coverImageCaption       String?
+  coverImageSource        String?  // Licensed photography source
+  coverImageLicense       String?  // Commercial license
+  readingTime             String?  @default("5 min read")
+  
+  // Phase 13 Verification & Relations
+  sourcesJson             String   @default("[]") // Verified authoritative sources: [{ title, url, type, isVerified }]
+  relatedDestinationsJson String   @default("[]") // [{ id, name, slug }]
+  relatedPackagesJson     String   @default("[]") // [{ id, name, slug, startingPrice, durationText }]
+  tagsJson                String   @default("[]") // ["Schengen", "Visa", "Packing"]
+  
+  isFeatured              Boolean  @default(false)
+  isPublished             Boolean  @default(true)
+  isArchived              Boolean  @default(false)
+  publishedAt             DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([category])
+  @@index([slug])
+  @@index([isPublished])
+  @@index([isArchived])
+  @@index([publishedAt])
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "company_name", "support_email", "support_phone", "company_address", "gst_number", "base_currency", "auto_confirm_bookings"
+  value       String
+  category    String   @default("GENERAL") // "GENERAL", "FINANCIAL", "CONTACT", "POLICIES"
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+}
+
